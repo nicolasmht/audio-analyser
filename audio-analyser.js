@@ -7,11 +7,22 @@ class AudioAnalyser {
 
         this.ctx = new (window.AudioContext || window.webkitAudioContext)();
         this.analyser = this.ctx.createAnalyser();
-        this.analyser.fftSize = 2048;
+
+        // this.analyser.fftSize = 32;
+        // this.analyser.fftSize = 64;
+        // this.analyser.fftSize = 128;
+        // this.analyser.fftSize = 256;
+        // this.analyser.fftSize = 512;
+        // this.analyser.fftSize = 1024;
+        // this.analyser.fftSize = 2048;
+        this.analyser.fftSize = 4096;
+        // this.analyser.fftSize = 8192;
+        // this.analyser.fftSize = 16384;
+        // this.analyser.fftSize = 32768;
 
         this.source = 0;
 
-        this.datasFrequency = new Float32Array(2048);
+        this.datasFrequency = new Float32Array( this.analyser.fftSize );
         this.datasBits = new Uint8Array( this.analyser.frequencyBinCount );
 
         this.averages = {
@@ -122,4 +133,47 @@ class AudioAnalyser {
         return this.averages;
     }
 
+    previous() {
+        let canvas = document.createElement("canvas"),
+            ctx = canvas.getContext("2d");
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        canvas.style.position = "absolute";
+        canvas.style.top = "0px";
+        canvas.style.right = "0px";
+        canvas.style.botom = "0px";
+        canvas.style.left = "0px";
+        canvas.style.background = "#000";
+
+        document.querySelector('body').appendChild(canvas);
+
+        let widthLine = (canvas.width - (7 * 50)) / 8,
+            widthLineAverage = widthLine/2 + (canvas.width - (7 * 50)) / 8;
+        
+        function animation() {
+
+            let dataAudios = audioAnalyser.getDatasAudio();
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = 'red';
+            ctx.fillRect(widthLine, canvas.height - dataAudios.lowBass * 200, 10, 200);
+            
+            ctx.fillRect(widthLine * 2, canvas.height - dataAudios.bass * 200, 10, 200);
+            ctx.fillRect(widthLine * 3, canvas.height - dataAudios.inferiorMedium * 200, 10, 200);
+            ctx.fillRect(widthLine * 4, canvas.height - dataAudios.medium * 200, 10, 200);
+            ctx.fillRect(widthLine * 5, canvas.height - dataAudios.superiorMedium * 200, 10, 200);
+            ctx.fillRect(widthLine * 6, canvas.height - dataAudios.acute * 200, 10, 200);
+            ctx.fillRect(widthLine * 7, canvas.height - dataAudios.superiorAcute * 200, 10, 200);
+            
+            ctx.fillStyle = 'green';
+            ctx.fillRect(widthLine * 8, canvas.height - dataAudios.global * 200, 10, 200);
+            
+            window.requestAnimationFrame(animation);
+        }
+
+        animation();
+    }
 }
